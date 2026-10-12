@@ -21,6 +21,8 @@ The source PDF used to develop the technical explanation is not included.
 
 ## Equalizer and receiver metrics
 
+The equalizer solves a data-aided least-squares fit: for each candidate sampling phase and target alignment, it chooses tap weights w that minimize ||P w - t||^2, where P is built from received training symbols and 	 is the aligned transmitted sequence. The best pair in the supplied run is phase 17 and target index 5. The resulting taps are then held fixed for the entire noise sweep, so the experiment isolates how the same receiver performs as Eb/N0 changes.
+
 The LS equalizer finds tap weights that make its output approximate the known transmitted symbol sequence. Searching the sampling phase selects where within each symbol interval the receiver should sample. Searching the target index shifts the desired sequence against the equalizer output; this lets the finite tap span balance precursor and postcursor ISI.
 
 The selected sampling phase is **17** (MATLAB's 1-based sample index), and the target index is **5** of 8. The minimum training MSE is **3e-6**. The measured effective signal gain is **0.999997**, and the residual ISI power is **3e-6**. The near-unity gain means the desired symbol amplitude is essentially preserved; residual ISI is the remaining error after subtracting that gain-scaled ideal symbol sequence.
@@ -31,6 +33,27 @@ The run reports pre-equalization SIR of **2.96 dB** and post-equalization SIR of
 
 For the theoretical curve, the script combines residual ISI and NEF-scaled noise into an effective SINR, then uses the PAM-4 Q-function approximation `BER ≈ (1.5/2) Q(sqrt(0.2 × SINR))`. The reported simulated BER is computed as symbol-error rate divided by two. Since the mapping is natural binary rather than Gray coded, this conversion is an approximation: a decision between the two middle levels can change both bits. The theoretical curve is likewise an approximate comparison for this bit mapping, rather than an exact bit-error calculation.
 
+## Visual results
+
+The three plots below are cropped from the supplied technical report. They are included as image files only; the PDF is not part of this repository. The waveform and BER plots show an earlier report run. In particular, the report BER plot stops at 20 dB, while the supplied console data in the results table continues through 24 dB. Use the table as the source for the current run's numeric values.
+
+### Waveform through the link
+
+![Transmitted PAM-4 waveform, single-pole channel output, noisy equalized output, and filtered equalized output](figures/waveform_comparison.png)
+
+The green trace is the held transmit waveform. The blue trace shows the channel's rounded transitions: a symbol does not settle immediately, so energy leaks into neighboring symbol periods and causes ISI. The cyan trace is the filtered, equalized output; it returns toward the intended levels at decision times. The red trace includes noise at 0 dB Eb/N0 and has large excursions. It illustrates noisy behavior, not residual ISI by itself. This older plot uses a wider vertical range than the symbol levels, so portions of the red trace extend beyond the displayed range.
+
+### BER versus Eb/N0
+
+![Report-run simulated and theoretical BER curves from 0 to 20 dB](figures/ber_curve_reference.png)
+
+The horizontal axis is Eb/N0 in dB and the vertical axis is logarithmic BER. Both curves fall as Eb/N0 rises, because the signal becomes stronger relative to noise. Their close tracking supports the effective-SINR model across this range. The plot is from the report's earlier run, so its last point and exact values do not match the 0-to-24 dB table below. At high Eb/N0, few observed errors make Monte Carlo estimates more variable; zero errors in a finite run does not establish a zero underlying BER.
+
+### Channel and equalizer magnitude responses
+
+![Magnitude response of the single-pole channel and least-squares equalizer](figures/channel_equalizer_response.png)
+
+The red dashed curve shows channel attenuation as frequency increases. The blue equalizer curve rises over the same band, approximately compensating for that attenuation. Such boosting can also boost noise. The receiver low-pass filter limits out-of-band noise before equalization, which helps explain why the combined filter/equalizer NEF in this run is 0.195483. This is a property of the complete receiver chain and the script's normalization, not a general guarantee that equalization suppresses noise.
 ## Results
 
 Results below reproduce the supplied run. The error count is the number of symbol decisions that differ from the transmitted symbols, out of 10,000 symbols. The SINR values in the supplied console output are linear values despite its `dB` label; the table converts them using `10 log10(SINR)`.
@@ -51,7 +74,7 @@ Results below reproduce the supplied run. The error count is the number of symbo
 | 22 | 1    | 5.000000e-5 | 2.122628e-5 | 19.09 |
 | 24 | 0    | 0           | 1.500202e-7 | 21.09 |
 
-The measured signal power is **2.246756**. At 24 dB, this finite 10,000-symbol run observed no symbol errors; that does not imply the true BER is zero. The theoretical estimate at that point is approximately **1.50e-7**, and a longer simulation would be needed to estimate such a low error rate reliably.
+The measured signal power is **2.246756**. At 0 dB, 5,660 of 10,000 symbol decisions are wrong; at 10 dB, 2,320 are wrong; and at 20 dB, 17 are wrong. This decline shows the expected improvement with signal-to-noise ratio. At 24 dB, this finite 10,000-symbol run observed no symbol errors; that does not imply the true BER is zero. The theoretical estimate at that point is approximately **1.50e-7**, and a longer simulation would be needed to estimate such a low error rate reliably.
 
 The simulated and theoretical curves follow the same decreasing trend across the sweep. Differences at high Eb/N0 are expected when only a small number of errors occur, and the natural-binary mapping and SER-to-BER approximation also affect their agreement.
 
