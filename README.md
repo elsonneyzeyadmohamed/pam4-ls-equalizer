@@ -21,9 +21,7 @@ The source PDF used to develop the technical explanation is not included.
 
 ## Equalizer and receiver metrics
 
-The equalizer solves a data-aided least-squares fit: for each candidate sampling phase and target alignment, it chooses tap weights w that minimize ||P w - t||^2, where P is built from received training symbols and 	 is the aligned transmitted sequence. The best pair in the supplied run is phase 17 and target index 5. The resulting taps are then held fixed for the entire noise sweep, so the experiment isolates how the same receiver performs as Eb/N0 changes.
-
-The LS equalizer finds tap weights that make its output approximate the known transmitted symbol sequence. Searching the sampling phase selects where within each symbol interval the receiver should sample. Searching the target index shifts the desired sequence against the equalizer output; this lets the finite tap span balance precursor and postcursor ISI.
+The equalizer solves a data-aided least-squares fit: for each candidate phase and target alignment, it chooses tap weights that minimize the squared error between the equalizer output and the aligned transmitted reference. The received training samples form the convolution matrix, and the known transmitted symbols form the target sequence. Searching all 20 phases finds the sample instant within each symbol interval that gives the lowest MSE. Searching 8 target indices shifts the reference against the equalizer output, balancing how many taps cancel precursor versus postcursor ISI. The best pair in this run is phase 17 and target index 5. Those taps are then held fixed throughout the noise sweep, so each Eb/N0 point uses the same trained receiver.
 
 The selected sampling phase is **17** (MATLAB's 1-based sample index), and the target index is **5** of 8. The minimum training MSE is **3e-6**. The measured effective signal gain is **0.999997**, and the residual ISI power is **3e-6**. The near-unity gain means the desired symbol amplitude is essentially preserved; residual ISI is the remaining error after subtracting that gain-scaled ideal symbol sequence.
 
