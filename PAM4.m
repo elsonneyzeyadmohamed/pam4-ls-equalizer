@@ -232,7 +232,8 @@ SINR_linear_theoretical = signal_power * effective_gain^2/total_impairment;
 SER_theoretical = 1.5 * qfunc(sqrt(0.2 * SINR_linear_theoretical));
 BER_theoretical(idx) = SER_theoretical/2;
 % Print progress
-fprintf('Eb/No = %2d dB | Errors = %4d | BER = %e | SINR = %2d dB \n', current_EbN0_dB, num_errors, BER_simulated(idx), SINR_linear_theoretical);
+SINR_dB = 10 * log10(SINR_linear_theoretical);
+fprintf('Eb/No = %2d dB | Symbol Errors = %4d | BER = %e | SINR = %.2f dB \n', current_EbN0_dB, num_errors, BER_simulated(idx), SINR_dB);
 
 end
 fprintf('--- Pre-Channel ---------\n');
@@ -244,7 +245,7 @@ fprintf('--- AFTER-Equalization SIR ---------\n\n');
 fprintf('Signal-to-Interference Ratio (SIR) = %.2f dB\n', SIR_dB);
 
 fprintf('--- BER Results ---------\n');
-fprintf('Total Bit Errors   = %d out of %d\n', num_errors, N_symbols);
+fprintf('Total Symbol Errors = %d out of %d\n', num_errors, N_symbols);
 fprintf('Simulated BER      = %e\n', BER_simulated);
 fprintf('Theoretical BER    = %e\n', BER_theoretical);
 
@@ -307,6 +308,3 @@ title('Eye Diagram: filtered Equalized Output ' );
 % Plot Eye Diagram for the noisy 0 dB case
 eyediagram(saved_very_noisy_equalized, 2*rect_length, 2*Tb, sampling_offset);
 title('Eye Diagram of Very Noisy Equalized Signal (0 dB)');
-
-
-
